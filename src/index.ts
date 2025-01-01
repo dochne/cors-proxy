@@ -19,6 +19,10 @@ export default {
 			'Access-Control-Allow-Methods': 'GET',
 		};
 
+		const allowList: ((arg0: string) => boolean)[] = [
+			(url: string) => url.startsWith('https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:ta7md6dgr25hz4kztzx2v54o'),
+		];
+
 		const origin = request.headers.get('Origin');
 		if (origin !== null) {
 			const originUrl = new URL(origin);
@@ -30,6 +34,10 @@ export default {
 
 		if (!url) {
 			return new Response('Invalid URL passed', { status: 400 });
+		}
+
+		if (allowList.every((callable) => !callable(request.url))) {
+			return new Response('URL is not in the allowlist');
 		}
 
 		const response = await fetch(url);
