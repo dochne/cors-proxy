@@ -36,8 +36,9 @@ export default {
 			return new Response('Invalid URL passed', { status: 400 });
 		}
 
-		if (allowList.every((callable) => !callable(request.url))) {
-			return new Response('URL is not in the allowlist');
+		// If every allowList possibility fails
+		if (allowList.every((callable) => !callable(url.toString()))) {
+			return new Response(`URL is not in the allowlist`);
 		}
 
 		const response = await fetch(url);
