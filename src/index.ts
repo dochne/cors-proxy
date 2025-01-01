@@ -13,6 +13,30 @@
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+		const url = new URL(request.url).searchParams.get('url') || undefined;
+
+		const defaultHeaders: Record<string, string> = {
+			'Access-Control-Allow-Methods': 'GET',
+		};
+
+		const origin = request.headers.get('Origin');
+		if (origin !== null) {
+			const originUrl = new URL(origin);
+			if (originUrl.hostname === 'localhost' || originUrl.hostname.match('dochne.com$')) {
+				// We allow dochne and localhost!
+				defaultHeaders['Access-Control-Allow-Origin'] = `${originUrl.protocol}//${originUrl.host}`;
+			}
+		}
+
+		if (!url) {
+			return new Response('Invalid URL passed', { status: 400 });
+		}
+
+		const response = await fetch(url);
+		return new Response(await response.bytes(), {
+			status: response.status,
+			statusText: response.statusText,
+			headers: { ...response.headers, ...defaultHeaders },
+		});
 	},
 } satisfies ExportedHandler<Env>;
