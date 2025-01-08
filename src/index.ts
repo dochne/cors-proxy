@@ -11,6 +11,8 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+const domains = ['dochne.com', 'bquark.com'];
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url).searchParams.get('url') || undefined;
@@ -26,7 +28,7 @@ export default {
 		const origin = request.headers.get('Origin');
 		if (origin !== null) {
 			const originUrl = new URL(origin);
-			if (originUrl.hostname === 'localhost' || originUrl.hostname.match('dochne.com$')) {
+			if (originUrl.hostname === 'localhost' || domains.some((domain) => originUrl.hostname.match(`${domain}$`))) {
 				// We allow dochne and localhost!
 				defaultHeaders['Access-Control-Allow-Origin'] = `${originUrl.protocol}//${originUrl.host}`;
 			}
